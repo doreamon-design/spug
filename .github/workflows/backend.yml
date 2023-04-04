@@ -63,14 +63,17 @@ jobs:
           echo "Docker Tags: ${{ steps.meta.outputs.tags }}"
 
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: zmicro-design/action-docker-build@v1
         with:
           build-args: |
             VERSION=${{ steps.meta.outputs.version }}
-          context: spug_api/
+          context: .
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=registry,ref=${{ steps.meta.outputs.name }}:buildcache
           cache-to: type=registry,ref=${{ steps.meta.outputs.name }}:buildcache,mode=max
           tags: ${{ steps.meta.outputs.tags }}
           # labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          #
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}

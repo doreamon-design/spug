@@ -67,7 +67,7 @@ jobs:
         with:
           build-args: |
             VERSION=${{ steps.meta.outputs.version }}
-          context: .
+          context: spug_web/
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=registry,ref=${{ steps.meta.outputs.name }}:buildcache
           cache-to: type=registry,ref=${{ steps.meta.outputs.name }}:buildcache,mode=max
@@ -77,4 +77,4 @@ jobs:
           #
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
+

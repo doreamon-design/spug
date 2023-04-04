@@ -17,8 +17,11 @@ import avatar from './avatar.png';
 export default function (props) {
 
   function handleLogout() {
-    history.push('/');
-    http.get('/api/account/logout/')
+    // history.push('/');
+    // http.get('/api/account/logout/')
+
+    const origin = window.location.pathname + window.location.search;
+    window.location.href = `/logout?from=${encodeURIComponent(origin)}`;
   }
 
   function openTerminal() {

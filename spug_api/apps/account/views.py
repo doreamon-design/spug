@@ -212,8 +212,8 @@ def token(request):
         'is_supper': user.is_supper,
         'is_active': user.is_active,
         'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global if verify_ip else True,
-        'host_perms': [] if user.is_supper else user.host_perms,
-        'permissions': [] if user.is_supper else user.page_perms,
+        # # 'host_perms': [] if user.is_supper else user.host_perms,
+        'permissions': [] if user.is_supper else list(user.page_perms),
     })
 
 

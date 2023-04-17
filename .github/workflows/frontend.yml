@@ -57,7 +57,7 @@ jobs:
         id: meta
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          name: spug-backend
+          name: spug-frontend
 
       - name: Show Docker Tags
         run: |

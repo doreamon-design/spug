@@ -183,6 +183,39 @@ class SelfView(View):
             request.user.save()
         return json_response(error=error)
 
+def token(request):
+    user = request.user
+    cache.delete(user.username)
+    
+    x_real_ip = get_request_real_ip(request.headers)
+    token_isvalid = user.access_token and len(user.access_token) == 32 and user.token_expired >= time.time()
+    user.access_token = user.access_token if token_isvalid else uuid.uuid4().hex
+    user.token_expired = time.time() + 8 * 60 * 60
+    user.last_login = human_datetime()
+    user.last_ip = x_real_ip
+    user.save()
+
+    user_agent = user_agents.parse(request.headers.get('User-Agent'))
+    History.objects.create(
+        username=user.username,
+        type='jwt',
+        ip=x_real_ip,
+        agent=user_agent,
+        is_success=True,
+        message='',
+    )
+
+    verify_ip = AppSetting.get_default('verify_ip', 'True') == 'True'
+    return json_response({
+        'access_token': user.access_token,
+        'nickname': user.nickname,
+        'is_supper': user.is_supper,
+        'is_active': user.is_active,
+        'has_real_ip': x_real_ip and ipaddress.ip_address(x_real_ip).is_global if verify_ip else True,
+        # # 'host_perms': [] if user.is_supper else user.host_perms,
+        'permissions': [] if user.is_supper else list(user.page_perms),
+    })
+
 
 def login(request):
     form, error = JsonParser(

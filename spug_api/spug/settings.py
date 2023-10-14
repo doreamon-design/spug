@@ -24,12 +24,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'vk0do47)egwzz!uk49%(y3s(fpx4+ha@ugt-hcv&%&d@hwr&p7'
+SECRET_KEY = os.getenv('SECRET_KEY', 'vk0do47)egwzz!uk49%(y3s(fpx4+ha@ugt-hcv&%&d@hwr&p7')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+# ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -65,20 +66,92 @@ ASGI_APPLICATION = 'spug.routing.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
+# DATABASES = {
+#     'default': {
+#         'ATOMIC_REQUESTS': True,
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#             "capacity": 1000,
+#             "expiry": 120,
+#         },
+#     },
+# }
+
+SECRET_KEY = os.getenv('SECRET_KEY', 'SHOULD_BE_OVERRODE')
+
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', '') 
+
+# Environment
+DB_CONFIG = {
+  "ENGINE": os.getenv('DB_ENGINE', 'sqlite3'),
+  "HOST": os.getenv('DB_HOST', '127.0.0.1'),
+  "PORT": os.getenv('DB_PORT', '3306'),
+  "USER": os.getenv('DB_USER', 'spug'),
+  "PASSWORD": os.getenv('DB_PASSWORD', 'spug.dev'),
+  "DATABASE": os.getenv('DB_DATABASE', 'spug'),
+}
+
+REDIS_CONFIG = {
+  "HOST": os.getenv('REDIS_HOST', '127.0.0.1'),
+  "PORT": os.getenv('REDIS_PORT', '6379'),
+  "USERNAME": os.getenv('REDIS_USERNAME', ''),
+  "PASSWORD": os.getenv('REDIS_PASSWORD', ''),
+  "DB0": os.getenv('REDIS_DATABASE_0', '0'),
+  "DB1": os.getenv('REDIS_DATABASE_1', '1'),
+}
+
+if DB_CONFIG['ENGINE'] != 'sqlite3':
+    DATABASES = {
+        'default': {
+            'ATOMIC_REQUESTS': True,
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': DB_CONFIG['DATABASE'],
+            'USERNAME': DB_CONFIG['USERNAME'],
+            'PASSWORD': DB_CONFIG['PASSWORD'],
+            'HOST': DB_CONFIG['HOST'],
+            'PORT': DB_CONFIG['PORT'],
+            'OPTIONS': {
+                # 'unix_socket': '/var/lib/mysql/mysql.sock',
+                'charset': 'utf8mb4',
+                'sql_mode': 'STRICT_TRANS_TABLES',
+            }
+        }
+    }
+else:
+    DATABASES = {
     'default': {
         'ATOMIC_REQUESTS': True,
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join('/data', 'db.sqlite3'),
     }
 }
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis://" + REDIS_CONFIG['HOST'] + ":" + REDIS_CONFIG['PORT'] + "/" + REDIS_CONFIG['DB1'],
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "USERNAME": REDIS_CONFIG['USERNAME'],
+            "PASSWORD": REDIS_CONFIG['PASSWORD'],
         }
     }
 }
@@ -87,7 +160,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis://" + REDIS_CONFIG['USERNAME'] + ":" + REDIS_CONFIG['PASSWORD'] + "@" + REDIS_CONFIG['HOST'] + ":" + REDIS_CONFIG['PORT'] + "/" + REDIS_CONFIG['DB0'])],
             "capacity": 1000,
             "expiry": 120,
         },

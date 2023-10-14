@@ -1,0 +1,41 @@
+services:
+  app:
+    restart: always
+    image: whatwewant/connect-doreamon:v1
+    platform: linux/amd64
+    ports:
+      - 0.0.0.0:8080:8080 # webhook
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      #
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      REDIRECT_URI: ${REDIRECT_URI}
+      #
+      FRONTEND: http://frontend:8080
+      BACKEND: http://backend:8080
+
+  frontend:
+    image: whatwewant/spug-frontend:v3-1
+    # build:
+    #   context: ./spug_web
+    platform: linux/amd64
+
+  backend:
+    # image: whatwewant/spug-backend:v3-1
+    build:
+      context: ./spug_api
+    platform: linux/amd64
+    command: sleep infinity
+    environment:
+      PORT: 8080
+      SECRET_KEY: ${SECRET_KEY}
+      #
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${SECRET_KEY}
+    volumes:
+      - ./spug_api:/app
+  
+  redis:
+    image: redis:5-alpine
+    command: redis-server --requirepass ${SECRET_KEY}

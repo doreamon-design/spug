@@ -51,9 +51,9 @@ class AuthenticationMiddleware(MiddlewareMixin):
                     'verify_iat': False,
                 })
                 print('jwt payload: ', payload)
-                username = payload['user_email']
-                nickname = payload['user_nickname']
-                user_avatar = payload['user_avatar']
+                username = payload['email']
+                nickname = payload['nickname']
+                user_avatar = payload['avatar']
 
                 user = User.objects.filter(username=username).first()
                 if not user:
